@@ -46,6 +46,7 @@ class Blob:
             self.x-=self.velocity
         elif(direction==1):
             self.x+=self.velocity
+        
             
                 
         
