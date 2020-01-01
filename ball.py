@@ -1,6 +1,6 @@
 import pygame
 import os
-
+import random
 ballImage= pygame.transform.scale( pygame.image.load( os.path.join( "imgs","ball.png" ) ), (50,50) )
 RADIUS=10
 class Ball:
@@ -50,7 +50,7 @@ class Ball:
         elif(intersectionX<=18):
             self.deltaX-=self.velocity+blobVel
         else:
-            self.deltaX=0
+            self.deltaX=random.randint(-2,2)
         self.tickCount=0
         
     

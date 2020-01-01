@@ -51,12 +51,13 @@ class Blob:
     def bounce(self,colliderVel,colliderUpVel):
         pass
     
-    def move(self,direction):
+    def move(self,direction,minBoundX,maxBoundX):
         if(direction==0):
             self.x-=self.movement+self.velocity
+            self.x=max(self.x,minBoundX)
         elif(direction==1):
             self.x+=self.movement+self.velocity
-            
+            self.x=min(self.x,maxBoundX)
         self.velocity+=1
         
     def resetVelocity(self):
