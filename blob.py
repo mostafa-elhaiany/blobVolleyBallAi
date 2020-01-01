@@ -12,15 +12,22 @@ class Blob:
         self.x=x
         self.y=y
         self.tickCount=0 
-        self.velocity=10
+        self.velocity=0
+        self.movement=10
         self.height=BLOB_HEIGHT
         self.width=BLOB_WIDTH
         self.image=BLOB_IMAGE
         self.jumpCount=0
         self.jumpVel=0
         self.isJumping=False
+        self.score=0
         
-        
+    def follow(self, ball,xBound,enemy):
+        if(ball.x>xBound and enemy):
+            self.x=ball.x+20
+        if(ball.x<xBound and not enemy):
+            self.x=ball.x-20
+                
     
     def jump(self):
         self.jumpVel=JUMP_HEIGHT
@@ -39,15 +46,22 @@ class Blob:
         if(self.y>windowHeight-self.height):
             self.isJumping=False
             self.y=windowHeight-self.height-10
+            self.jumpVel=0
             
-        
+    def bounce(self,colliderVel,colliderUpVel):
+        pass
+    
     def move(self,direction):
         if(direction==0):
-            self.x-=self.velocity
+            self.x-=self.movement+self.velocity
         elif(direction==1):
-            self.x+=self.velocity
-        
+            self.x+=self.movement+self.velocity
             
+        self.velocity+=1
+        
+    def resetVelocity(self):
+         self.velocity=0
+       
                 
         
     def draw(self, window):

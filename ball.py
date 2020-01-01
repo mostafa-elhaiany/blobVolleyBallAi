@@ -42,13 +42,13 @@ class Ball:
             self.deltaX=0
             
             
-    def bounce(self,intersectionX):
-        self.y+=self.velocity
+    def bounce(self,intersectionX,blobVel,blobJumpVel):
+        self.y+=self.velocity+blobJumpVel
         self.deltaY=-self.velocity
         if(intersectionX>=20):
-            self.deltaX+=self.velocity
+            self.deltaX+=self.velocity+blobVel
         elif(intersectionX<=18):
-            self.deltaX-=self.velocity
+            self.deltaX-=self.velocity+blobVel
         else:
             self.deltaX=0
         self.tickCount=0
@@ -68,7 +68,7 @@ class Ball:
         
         point=ballMask.overlap(blobMask,offset)
         if(point):
-            self.bounce(point[0])
+            self.bounce(point[0],blob.velocity,blob.jumpVel)
             return True
         
         return False
