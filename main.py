@@ -1,9 +1,11 @@
 import pygame
 import neat
 import os
+import numpy as np
 from blob import Blob
 from ball import Ball
 from wall import Wall
+from agent import DQNAgent
 
 pygame.init()
 
@@ -12,6 +14,73 @@ windowWidth,windowHeight=1000,400
 backGround= pygame.transform.scale( pygame.image.load( os.path.join( "imgs","bg.png" ) ),(windowWidth,windowHeight) )
 pygame.font.init()
 statFont=pygame.font.SysFont("comicsans",50)
+
+
+EPISODES = 500
+
+# Exploration settings
+epsilon = 1  # not a constant, going to be decayed
+EPSILON_DECAY = 0.99975
+MIN_EPSILON = 0.001
+
+
+class Env:
+    LOSE_PENALTY=-25
+    BALL_REWARD = 25
+    OBSERVATION_SPACE_VALUES = 3
+    ACTION_SPACE_SIZE = 3
+    
+    def reset(self):
+        self.blob=Blob(20,windowHeight-110)
+        self.ball=Ball(20,windowHeight//2)
+        self.wall=Wall(windowWidth//2-20,windowHeight-250)
+        self.enemyBlob=Blob(windowWidth-60,windowHeight-110)
+   
+        self.episode_step = 0
+
+        observation = [self.ball.x,self.ball.y,self.blob.x,self.ball.velocity]
+        return observation
+
+    def step(self, action):
+        self.episode_step += 1
+        self.blob.move(action,0,windowWidth//2)
+        
+        
+        self.enemyBlob.follow(self.ball,windowWidth//2,True)
+        
+        self.ball.move()
+        self.ball.gravity(windowHeight)
+        self.ball.collide(self.blob)
+        self.ball.collide(self.enemyBlob)
+
+        new_observation = [self.ball.x,self.ball.y,self.blob.x,self.ball.velocity]
+
+        if(self.ball.y>=windowHeight-self.ball.height-10 and self.ball.x<windowWidth//2-30):
+            reward=self.LOSE_PENALTY
+        elif(self.ball.y>=windowHeight-self.ball.height-10 and self.ball.x>=windowWidth//2-30 and self.ball.x<windowWidth):
+            reward=self.BALL_REWARD
+        elif(self.ball.x<=10):
+            reward=self.LOSE_PENALTY
+        elif(self.ball.x>=windowWidth-10):
+            reward=self.BALL_REWARD
+        elif(abs(self.ball.x-self.blob.x)>(windowWidth//2%10)):
+            reward=5
+        else:
+            reward=1
+
+        done = False
+        if reward == self.BALL_REWARD or reward == self.LOSE_PENALTY or self.episode_step >= 200:
+            done = True
+
+        return new_observation, reward, done
+
+    
+
+  
+
+env = Env()
+
+
 
 
 def drawWindow(window,blobs,balls,wall):
@@ -144,7 +213,7 @@ def NEAT(genomes,config):
                 newBalls.append(Ball(50,windowHeight//2))
                 blobs[idx].score+=20
             elif(ball.x<0 or ball.x>=windowWidth-40 ):
-                genes[idx].fitness-=0.5
+                genes[idx].fitness-=5
                 
             else:
                 genes[idx].fitness+=0.5
@@ -192,8 +261,56 @@ def run(configPath):
     
     pygame.quit()
     #print(winner)
+   
+    
+    
+    
+def DQN(episodes,epsilon,epsilonDeca):
+    env=Env()
+    agent= DQNAgent()
+    #window=pygame.display.set_mode((windowWidth,windowHeight))
+    episodeRewards=[]
+    for episode in range(episodes):
+        episode_reward = 0
+        step = 1
+        current_state = env.reset()
+        done = False
+        while not done:
+
+        # This part stays mostly the same, the change is to query a model for Q values
+            if np.random.random() > epsilon:
+                # Get action from Q table
+                
+                action = np.argmax(agent.getQs(np.array(current_state)))
+            else:
+                # Get random action
+                action = np.random.randint(0, env.ACTION_SPACE_SIZE)
+    
+            new_state, reward, done = env.step(action)
+            episode_reward += reward
+
+        
+           #drawWindow(window,[env.blob,env.enemyBlob],[env.ball],env.wall)
+    
+            # Every step we update replay memory and train main network
+            agent.updateReplyMemory((current_state, action, reward, new_state, done))
+            agent.train(done, step)
+            current_state = new_state
+            step += 1
+        episodeRewards.append(episode_reward)
+        if episode % 10==0:
+            averageReward = sum(episodeRewards)/len(episodeRewards)
+            minReward = min(episodeRewards)
+            maxReward = max(episodeRewards)
+            print(f"replayMemo:{len(agent.replayMemory)}  avg:{averageReward} \n  min:{minReward}  \n  max:{maxReward} ")
+        if epsilon > MIN_EPSILON:
+            epsilon *= EPSILON_DECAY
+            epsilon = max(MIN_EPSILON, epsilon)
+    
     
 if __name__=="__main__":
-    localDirectory= os.path.dirname(__file__)
-    configPath= os.path.join(localDirectory,"config.txt")
-    run(configPath)
+    #localDirectory= os.path.dirname(__file__)
+    #configPath= os.path.join(localDirectory,"config.txt")
+    #run(configPath)
+    DQN(EPISODES,epsilon,EPSILON_DECAY)
+    pygame.quit()

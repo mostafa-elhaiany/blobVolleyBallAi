@@ -58,6 +58,10 @@ class Blob:
         elif(direction==1):
             self.x+=self.movement+self.velocity
             self.x=min(self.x,maxBoundX)
+        else:
+            self.resetVelocity()
+            return
+        
         self.velocity+=1
         
     def resetVelocity(self):
