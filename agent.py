@@ -72,8 +72,8 @@ class DQNAgent:
             
             x.append(currentState)
             y.append(currentQs)
-        print("fittinggg")
-        self.model.fit(np.array(x), np.array(y),batch_size=BATCH_SIZE,verbose=1,epochs=1000,shuffle=False)
+        self.model.fit(np.array(x), np.array(y),batch_size=BATCH_SIZE,verbose=0,epochs=1000,shuffle=False)
+        print("done fitting model \n")
         
         
         if terminalState:

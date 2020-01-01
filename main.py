@@ -111,12 +111,12 @@ def play():
         
         keys=pygame.key.get_pressed()
         enemyBlob.follow(ball,windowWidth//2,True)
-        blob.follow(ball,windowWidth//2,False)
+        #blob.follow(ball,windowWidth//2,False)
         
         if(keys[pygame.K_LEFT] and blob.x>blob.movement):
-            blob.move(0)
+            blob.move(0,0,windowWidth//2)
         elif(keys[pygame.K_RIGHT] and blob.x<windowWidth//2-blob.movement-50):
-                blob.move(1)
+                blob.move(1,0,windowWidth//2)
         else:
             blob.resetVelocity()
         if(keys[pygame.K_UP] and not blob.isJumping):
@@ -307,10 +307,15 @@ def DQN(episodes,epsilon,epsilonDeca):
             epsilon *= EPSILON_DECAY
             epsilon = max(MIN_EPSILON, epsilon)
     
+    pygame.quit()
+    
+    
     
 if __name__=="__main__":
     #localDirectory= os.path.dirname(__file__)
     #configPath= os.path.join(localDirectory,"config.txt")
     #run(configPath)
-    DQN(EPISODES,epsilon,EPSILON_DECAY)
-    pygame.quit()
+    play()
+    
+    #DQN(EPISODES,epsilon,EPSILON_DECAY)
+    
