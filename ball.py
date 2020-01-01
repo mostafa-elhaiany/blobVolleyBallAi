@@ -4,7 +4,7 @@ import os
 ballImage= pygame.transform.scale( pygame.image.load( os.path.join( "imgs","ball.png" ) ), (50,50) )
 RADIUS=10
 class Ball:
-    velocity=5
+    velocity=15
     
     
     def __init__(self,x,y):
@@ -26,7 +26,6 @@ class Ball:
         self.x+=self.deltaX
         self.y+=self.deltaY
         
-        
     
     def gravity(self,windowHeight):
         self.deltaY+=2
@@ -39,12 +38,19 @@ class Ball:
             
         self.y+=displacement
         if(self.y>windowHeight-self.height):
-            self.isJumping=False
             self.y=windowHeight-self.height-10
+            self.deltaX=0
             
-    def bounce(self):
-        self.y+=10
-        self.deltaY=-10
+            
+    def bounce(self,intersectionX):
+        self.y+=self.velocity
+        self.deltaY=-self.velocity
+        if(intersectionX>=20):
+            self.deltaX+=self.velocity
+        elif(intersectionX<=18):
+            self.deltaX-=self.velocity
+        else:
+            self.deltaX=0
         self.tickCount=0
         
     
@@ -62,7 +68,7 @@ class Ball:
         
         point=ballMask.overlap(blobMask,offset)
         if(point):
-            self.bounce()
+            self.bounce(point[0])
             return True
         
         return False

@@ -3,12 +3,12 @@ import os
 from blob import Blob
 from ball import Ball
 
-backGround= pygame.transform.scale2x( pygame.image.load( os.path.join( "imgs","bg.png" ) ) )
-windowWidth,windowHeight=500,400
-
 pygame.init()
 pygame.font.init()
 
+
+backGround= pygame.transform.scale2x( pygame.image.load( os.path.join( "imgs","bg.png" ) ) )
+windowWidth,windowHeight=500,400
 statFont=pygame.font.SysFont("comicsans",50)
 
 
@@ -35,20 +35,24 @@ def main():
                 run=False
                 pygame.quit()
                 return
-            keys=pygame.key.get_pressed()
-            if(keys[pygame.K_LEFT]):
-                blob.move(0)
-            elif(keys[pygame.K_RIGHT]):
+        
+        keys=pygame.key.get_pressed()
+        if(keys[pygame.K_LEFT]):
+            blob.move(0)
+        elif(keys[pygame.K_RIGHT]):
                 blob.move(1)
-            if(keys[pygame.K_SPACE] and not blob.isJumping ):
-                #blob.jump()
-                ballOn= True
+       
+        if(keys[pygame.K_UP] and not blob.isJumping):
+            blob.jump()
+        
+        if(keys[pygame.K_SPACE]):
+            ballOn= True
+        
         blob.gravity(windowHeight)
         if(ballOn):
             ball.move()
             ball.gravity(windowHeight)
-            print(ball.collide(blob))
+            print(ball.collide(blob) or ball.collide(enemyBlob) )
         drawWindow(window,[blob,enemyBlob],[ball])
             
-if __name__=='__main__':
-    main()        
+main()
